@@ -35,9 +35,7 @@ def imgRegistration(img1, img2):
 
     if len(good)>MIN_MATCH_COUNT:
         src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2) # -1 : auto size
-        print(src_pts.shape)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
-        print(dst_pts.shape)
         
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
         
@@ -45,7 +43,7 @@ def imgRegistration(img1, img2):
 
         theta = np.arctan(M[1, 2]/M[0, 2])
 
-        print(f"M : {M} \n Theta : {theta}")
+        # print(f"M : {M} \n Theta : {theta}")
 
         if np.abs(theta)<0.17 : # 10도
             if theta > 0: print("Img1 : 오른쪽, Img2 : 왼쪽")
@@ -65,19 +63,14 @@ def imgRegistration(img1, img2):
                     print("Img1 : 오른쪽 위, Img2 : 왼쪽 아래")
                 else:
                     print("Img1 : 왼쪽 위, Img2 : 오른쪽 아래")
-                
-        
-            
-            
-        
-        h, w = qImg.shape
-        pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
-        print(pts.shape)
-        dst = cv2.perspectiveTransform(pts, M)
-        
-        print(dst)
 
-        tImg = cv2.polylines(tImg, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
+
+        # h, w = qImg.shape
+        # pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
+        # print(pts.shape)
+        # dst = cv2.perspectiveTransform(pts, M)
+
+        # tImg = cv2.polylines(tImg, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
 
     else :
         print(f"Not enough matches are found - {len(good)} / {MIN_MATCH_COUNT}")
@@ -87,25 +80,13 @@ def imgRegistration(img1, img2):
                     singlePointColor = None,
                     matchesMask = matchesMask, # draw only inliers
                     flags = 2)
-        
 
-    img3 = cv2.drawMatches(qImg, kp1, tImg, kp2, good, None, **draw_params) # 키워드 가변인자
+
+    matchedImg = cv2.drawMatches(qImg, kp1, tImg, kp2, good, None, **draw_params) # 키워드 가변인자
     
 
-    # -- Merge Part
-    # qImg : (오른쪽뷰), tImg : (왼쪽뷰)
-    width = 2*max(tImg.shape[1], qImg.shape[1])
-    height = 2*max(tImg.shape[0], qImg.shape[0])
-
-
-    dst = cv2.warpPerspective(qImg, M, (width, height))
-
-    dst[0:tImg.shape[0], 0:tImg.shape[1]] = tImg
-
-    
     cv2.destroyAllWindows()
-
-    return img3, dst
+    return matchedImg
 
 
 
@@ -113,12 +94,12 @@ def imgRegistration(img1, img2):
 
 if __name__ == "__main__":
     root = Tk()
-    path = filedialog.askopenfilename(initialdir = "A.stiching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(initialdir = "A._Stitching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
     img1 = cv2.imread(path)
     root.withdraw()
 
     root = Tk()
-    path = filedialog.askopenfilename(initialdir = "A.stiching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(initialdir = "A._Stitching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
     img2 = cv2.imread(path)
     root.withdraw()
 
@@ -126,44 +107,10 @@ if __name__ == "__main__":
     img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
    
-    matchImg, resultImg = imgRegistration(img1, img2)
-    cv2.imshow("test1", img1)
-    cv2.imshow("test2", img2)
-    cv2.imshow("test3", matchImg)
-    cv2.imshow("test4", resultImg)
-
-
-
-    # img1_b, img1_g, img1_r = cv2.split(img1)
-    # img2_b, img2_g, img2_r = cv2.split(img2)
-
-    # img3_b, dst_b = imgRegistration(img1_b, img2_b, "b")
-    # img3_g, dst_g = imgRegistration(img1_g, img2_g, "g")
-    # img3_r, dst_r = imgRegistration(img1_r, img2_r, "r")
-
-    # zeros = np.zeros_like(img3_b)
-
-    # img_result = cv2.merge([img3_b, img3_g, img3_r])
-    # dst_result = cv2.merge([dst_b, dst_g, dst_r])
-
-    # img_result_b = cv2.merge([img3_b, zeros, zeros])
-    # img_result_g = cv2.merge([zeros, img3_g, zeros])
-    # img_result_r = cv2.merge([zeros, zeros, img3_r])
-
-    # zeros = np.zeros_like(dst_b)
-
-    # print(img_result.shape)
-    # cv2.imwrite(f"img_result.jpg", img_result)
-
-    # cv2.imwrite(f"dst_result.jpg", dst_result)
-
-    # cv2.imwrite(f"img_result_b.jpg", img_result_b)
-    # cv2.imwrite(f"img_result_g.jpg", img_result_g)
-    # cv2.imwrite(f"img_result_r.jpg", img_result_r)
-
-    # cv2.imwrite(f"dst_result_b.jpg", dst_b)
-    # cv2.imwrite(f"dst_result_g.jpg", dst_g)
-    # cv2.imwrite(f"dst_result_r.jpg", dst_r)
+    matchImg = imgRegistration(img1, img2)
+    cv2.imshow("Img1", img1)
+    cv2.imshow("Img2", img2)
+    cv2.imshow("Matched Img", matchImg)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()

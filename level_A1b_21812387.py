@@ -13,25 +13,12 @@ def imgSticher_4(imgs):
         cv2.imshow(f"qImg", resultImg)
         cv2.imshow(f"tImg", imgs[i])
         cv2.waitKey(0)
-        qImgb, qImgg, qImgr = cv2.split(resultImg)
-        tImgb, tImgg, tImgr = cv2.split(imgs[i])
 
-        matchImgb, resultImgb = imgRegistration(qImgb, tImgb)
-        matchImgg, resultImgg = imgRegistration(qImgg, tImgg)
-        matchImgr, resultImgr = imgRegistration(qImgr, tImgr)
+        matchImg, resultImg = imgRegistration(resultImg, imgs[i])
 
-        
-        resultImg = cv2.merge([resultImgb, resultImgg, resultImgr])
-        matchImg = cv2.merge([matchImgb, matchImgg, matchImgr])
 
-        cv2.imshow(f"matchImgB{i}", matchImgb)
-        cv2.imshow(f"matchImgG{i}", matchImgg)
-        cv2.imshow(f"matchImgR{i}", matchImgr)
-        cv2.imshow(f"resultImgB{i}", resultImgb)
-        cv2.imshow(f"resultImgG{i}", resultImgg)
-        cv2.imshow(f"resultImgR{i}", resultImgr)
+        cv2.imshow(f"matchImg{i}", matchImg)
         cv2.imshow(f"resultImg{i}", resultImg)
-
         cv2.waitKey(0)
     
 
@@ -71,21 +58,17 @@ def imgRegistration(img1, img2):
         # print(dst_pts.shape)
         
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-        print(f"M :{M[0, 2], M[1, 2]}")
+        # print(f"M :{M[0, 2], M[1, 2]}")
         
         matchesMask = mask.ravel().tolist()
 
-        h, w = qImg.shape
+        h, w, _ = qImg.shape
         pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
 
         theta = np.arctan(M[1, 2]/M[0, 2])
 
-        # print(f"M : {M} \n Theta : {theta}")
-                
-        dst = cv2.perspectiveTransform(pts, M)
-        '''
-        tImg = cv2.polylines(tImg, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
-        '''
+            
+
 
     else :
         print(f"Not enough matches are found - {len(good)} / {MIN_MATCH_COUNT}")
@@ -170,26 +153,26 @@ def imgRegistration(img1, img2):
 
 if __name__ == "__main__":
     root = Tk()
-    path = filedialog.askopenfilename(initialdir = "A.stiching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(initialdir = "A._Stitching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
     img1 = cv2.imread(path)
     root.withdraw()
 
     imgW, imgH = img1.shape[1], img1.shape[0]
     windowW = 2*max(img1.shape[1], img1.shape[1])
-    windowH = 2*max(img1.shape[0], img1.shape[0])
-
+    windowH = 3*max(img1.shape[0], img1.shape[0])
+    
     root = Tk()
-    path = filedialog.askopenfilename(initialdir = "A.stiching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(initialdir = "A._Stitching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
     img2 = cv2.imread(path)
     root.withdraw()
 
     root = Tk()
-    path = filedialog.askopenfilename(initialdir = "A.stiching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(initialdir = "A._Stitching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
     img3 = cv2.imread(path)
     root.withdraw()
 
     root = Tk()
-    path = filedialog.askopenfilename(initialdir = "A.stiching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
+    path = filedialog.askopenfilename(initialdir = "A._Stitching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
     img4 = cv2.imread(path)
     root.withdraw()
 
