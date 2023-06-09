@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 from copy import deepcopy
 
-MIN_MATCH_COUNT = 4
+MIN_MATCH_COUNT = 10
 
 def generHomo(kp1, des1, kp2, des2, th):
     FLANN_INDEX_KDTREE = 0
@@ -25,7 +25,7 @@ def generHomo(kp1, des1, kp2, des2, th):
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
         
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-        print(f"M :{M}")
+        # print(f"M :{M}")
         
         
         cos = np.mean([M[0, 0], M[1, 1]])
@@ -40,15 +40,14 @@ def generHomo(kp1, des1, kp2, des2, th):
         
         # whatT = int(np.round(theta / 6)) if (M[0, 0] < 0) and (M[1, 1] <     0) else 60-int(np.round(theta / 6))
         
-        print(f"theta : \n{theta}")
+        # print(f"theta : \n{theta}")
         whatT = 60-int(np.round(theta / 6))
         
-        print("Now Time is 1: ", whatT)
+        print("Now Time is : ", whatT)
         matchesMask = mask.ravel().tolist()
 
 
     else :
-        print("HI")
         M, good, matchesMask, whatT = generHomo(kp1, des1, kp2, des2, th+0.1)
 
 
@@ -120,9 +119,10 @@ if __name__ == "__main__":
     windowH = max(refImg.shape[0], tarImg.shape[0])
 
 
+    print("\n[2023 VisionSystem Termproject : Level_B2]", end="\n")
     matchImg, whatT = whatTime(refImg, tarImg)
     cv2.imshow("matched Img: Result", matchImg)
-    # print("Now Time is : ", whatT)
+    print("")
     
     cv2.waitKey()
     cv2.destroyAllWindows()
