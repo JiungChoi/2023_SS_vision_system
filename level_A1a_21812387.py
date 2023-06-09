@@ -4,10 +4,7 @@ import numpy as np
 import cv2
 from copy import deepcopy
 
-
 MIN_MATCH_COUNT = 4
-
-
 def imgRegistration(img1, img2):
     qImg = deepcopy(img1)
     tImg = deepcopy(img2)
@@ -46,32 +43,23 @@ def imgRegistration(img1, img2):
         # print(f"M : {M} \n Theta : {theta}")
 
         if np.abs(theta)<0.17 : # 10도
-            if theta > 0: print("Img1 : 오른쪽, Img2 : 왼쪽")
-            else: print("Img1 : 왼쪽, Img2 : 오른쪽")
+            if M[0, 2] > 0: print("Img1 : 우, Img2 : 좌")
+            else: print("Img1 : 좌, Img2 : 우")
         elif np.abs(theta)> 1.4: # 80도
-            if theta > 0: print("Img1 : 아래쪽, Img2 : 위쪽")
-            else: print("Img1 : 위쪽, Img2 : 아래쪽")
+            if M[1, 2] > 0: print("Img1 : 하, Img2 : 상")
+            else: print("Img1 : 상, Img2 : 하")
 
         else: # 대각방향
             if M[1, 2] > 0 :
                 if M[0, 2] >0:
-                    print("Img1 : 오른쪽 아래, Img2 : 왼쪽 위")
+                    print("Img1 : 우하, Img2 : 좌상")
                 else:
-                    print("Img1 : 왼쪽 아래, Img2 : 오른쪽 위")
+                    print("Img1 : 좌하, Img2 : 우상")
             else:
                 if M[0, 2] >0:
-                    print("Img1 : 오른쪽 위, Img2 : 왼쪽 아래")
+                    print("Img1 : 우상, Img2 : 좌하")
                 else:
-                    print("Img1 : 왼쪽 위, Img2 : 오른쪽 아래")
-
-
-        # h, w = qImg.shape
-        # pts = np.float32([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]]).reshape(-1, 1, 2)
-        # print(pts.shape)
-        # dst = cv2.perspectiveTransform(pts, M)
-
-        # tImg = cv2.polylines(tImg, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
-
+                    print("Img1 : 좌상, Img2 : 우하")
     else :
         print(f"Not enough matches are found - {len(good)} / {MIN_MATCH_COUNT}")
         matchesMask = None
@@ -81,16 +69,10 @@ def imgRegistration(img1, img2):
                     matchesMask = matchesMask, # draw only inliers
                     flags = 2)
 
-
     matchedImg = cv2.drawMatches(qImg, kp1, tImg, kp2, good, None, **draw_params) # 키워드 가변인자
-    
 
     cv2.destroyAllWindows()
     return matchedImg
-
-
-
-
 
 if __name__ == "__main__":
     root = Tk()
@@ -103,14 +85,13 @@ if __name__ == "__main__":
     img2 = cv2.imread(path)
     root.withdraw()
 
-    img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-    img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
-   
+    print("\n[2023 VisionSystem Termproject : Level_A1a]", end="\n")
     matchImg = imgRegistration(img1, img2)
     cv2.imshow("Img1", img1)
     cv2.imshow("Img2", img2)
     cv2.imshow("Matched Img", matchImg)
+    print("")
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
