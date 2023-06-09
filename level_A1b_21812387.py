@@ -10,16 +10,12 @@ def imgSticher_4(imgs):
 
     resultImg = imgs[0]
     for i in range(1, len(imgs)):
-        cv2.imshow(f"qImg", resultImg)
-        cv2.imshow(f"tImg", imgs[i])
-        cv2.waitKey(0)
-
         matchImg, resultImg = imgRegistration(resultImg, imgs[i])
 
 
-        cv2.imshow(f"matchImg{i}", matchImg)
-        cv2.imshow(f"resultImg{i}", resultImg)
-        cv2.waitKey(0)
+    cv2.imshow(f"matchImg{i}", matchImg)
+    cv2.imshow(f"resultImg{i}", resultImg)
+    cv2.waitKey(0)
     
 
 
@@ -67,8 +63,6 @@ def imgRegistration(img1, img2):
 
         theta = np.arctan(M[1, 2]/M[0, 2])
 
-            
-
 
     else :
         print(f"Not enough matches are found - {len(good)} / {MIN_MATCH_COUNT}")
@@ -92,53 +86,51 @@ def imgRegistration(img1, img2):
         if M[0, 2] > 0: 
             dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
             dst[0:tImg.shape[0], 0:tImg.shape[1]] = tImg
-            print("Img1 : 오른쪽, Img2 : 왼쪽")
+            print("Img1 : 우, Img2 : 좌")
         else:
             
             M[0, 2] = M[0, 2] + dx
             dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
             dst[0:tImg.shape[0], dx:dx+tImg.shape[1]] = tImg
-            print("Img1 : 왼쪽, Img2 : 오른쪽")
+            print("Img1 : 좌, Img2 : 우")
     elif np.abs(theta)> 1.4: # 80도
         if M[1, 2] > 0:
             dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
             dst[0:tImg.shape[0], 0:tImg.shape[1]] = tImg
-            print("Img1 : 아래쪽, Img2 : 위쪽")
+            print("Img1 : 하, Img2 : 상")
         else:
             M[1, 2] = M[1, 2] + dy
             dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
             dst[dy:dy+tImg.shape[0], 0:tImg.shape[1]] = tImg
-            print("Img1 : 위쪽, Img2 : 아래쪽")
+            print("Img1 : 상, Img2 : 하")
 
     else: # 대각방향
         if M[1, 2] > 0 :
             if M[0, 2] >0:
                 dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
                 dst[0:tImg.shape[0], 0:tImg.shape[1]] = tImg
-                print("Img1 : 오른쪽 아래, Img2 : 왼쪽 위")
+                print("Img1 : 우하, Img2 : 좌상")
             else:
                 M[0:2, 2] = M[0:2, 2] + np.array([dx, dy])
                 dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
                 dst[dy:dy+tImg.shape[0], dx:dx+tImg.shape[1]] = tImg
-                print("Img1 : 왼쪽 아래, Img2 : 오른쪽 위")
+                print("Img1 : 좌하, Img2 : 우상")
         else:
             if M[0, 2] >0:
                 M[1, 2] = M[1, 2] + dy
                 dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
                 dst[dy:dy+tImg.shape[0], 0:tImg.shape[1]] = tImg
-
-                print("Img1 : 오른쪽 위, Img2 : 왼쪽 아래")
+                print("Img1 : 우상, Img2 : 좌하")
             else:
                 M[0:2, 2] = M[0:2, 2] + np.array([dx, dy])
                 dst = cv2.warpPerspective(qImg, M, (windowW, windowH))
                 dst[dy:dy+tImg.shape[0], dx:dx+tImg.shape[1]] = tImg
-                
-                print("Img1 : 왼쪽 위, Img2 : 오른쪽 아래")
+                print("Img1 : 좌상, Img2 : 우하")
 
 
     cv2.destroyAllWindows()
 
-    # 보정 수식
+    # 보정 수식 : 영상의 좌상단 좌표를 0,0 으로 초기화
     dy = np.min(np.where(dst>0)[0])
     dx = np.min(np.where(dst>0)[1])
     M = np.float32([[1, 0, -dx],[0, 1, -dy]])
@@ -160,7 +152,7 @@ if __name__ == "__main__":
     imgW, imgH = img1.shape[1], img1.shape[0]
     windowW = 2*max(img1.shape[1], img1.shape[1])
     windowH = 3*max(img1.shape[0], img1.shape[0])
-    
+
     root = Tk()
     path = filedialog.askopenfilename(initialdir = "A._Stitching", title= 'choose your image', filetypes = (("jpeg files", "*.jpg"), ("all files", "*.*")))
     img2 = cv2.imread(path)
